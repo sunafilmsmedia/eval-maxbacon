@@ -100,8 +100,8 @@ export const BRAND: BrandConfig = {
       height: 456,
     },
     banner: {
-      // Logo officiel RE/MAX, en haut à droite (pastille blanche).
-      src: "/remax-logo.jpg",
+      // Logo officiel RE/MAX en blanc, en haut à droite, directement sur le fond noir.
+      src: "/remax-logo-white.png",
       alt: "RE/MAX — Agence immobilière",
       width: 288,
       height: 78,
