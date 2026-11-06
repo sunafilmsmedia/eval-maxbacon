@@ -71,6 +71,11 @@ export default function ContactForm({ answers, verdict, onSubmitted, gated }: Pr
       // (newsletter consentie explicitement).
       const leadType =
         gated || verdict !== "defavorable" ? "evaluation" : "market_info";
+      // Même identifiant pour le pixel navigateur et la CAPI serveur (déduplication).
+      const eventId =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `lead-${Date.now()}-${Math.random().toString(36).slice(2)}`;
       const res = await fetch("/api/lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -82,6 +87,7 @@ export default function ContactForm({ answers, verdict, onSubmitted, gated }: Pr
           answers,
           leadType,
           ...getFbData(),
+          eventId,
         }),
       });
       const data = await res.json();
@@ -99,7 +105,8 @@ export default function ContactForm({ answers, verdict, onSubmitted, gated }: Pr
           content_category: "real_estate_evaluation",
           verdict,
           currency: "CAD",
-        }
+        },
+        eventId
       );
 
       trackStep("soumis");

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { computeScoring } from "@/lib/scoring";
 import { REGIONS } from "@/lib/regions";
 import { BRAND } from "@/lib/brand";
+import { sendCapiLead } from "@/lib/metaCapi";
 import type { Answers, LeadPayload, LeadType } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -13,6 +14,8 @@ interface IncomingBody extends Partial<LeadPayload> {
   fbclid?: string;
   fbc?: string;
   fbp?: string;
+  // Identifiant partagé avec le pixel navigateur (déduplication CAPI)
+  eventId?: string;
 }
 
 function splitName(full: string): { firstName: string; lastName: string } {
@@ -123,6 +126,25 @@ export async function POST(req: Request) {
     answers,
   };
 
+  // Meta Conversions API — Lead serveur, dédupliqué avec le pixel via eventId.
+  const capiPromise = sendCapiLead({
+    eventId: body.eventId,
+    email,
+    phone,
+    firstName,
+    lastName,
+    fbc: body.fbc,
+    fbp: body.fbp,
+    clientIp: req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || undefined,
+    userAgent: req.headers.get("user-agent") ?? undefined,
+    sourceUrl: req.headers.get("referer") ?? undefined,
+    customData: {
+      content_category: "real_estate_evaluation",
+      verdict: scoring?.verdict ?? null,
+      currency: "CAD",
+    },
+  });
+
   // Webhook CRM (GHL) — à définir via CRM_WEBHOOK_URL (env Vercel / .env.local).
   const webhookUrl = process.env.CRM_WEBHOOK_URL;
   const webhookSecret = process.env.CRM_WEBHOOK_SECRET;
@@ -148,6 +170,8 @@ export async function POST(req: Request) {
   } else {
     console.log("[lead] Stored (no webhook configured):", JSON.stringify(payload));
   }
+
+  await capiPromise;
 
   return NextResponse.json({
     stored: true,
