@@ -81,9 +81,9 @@ export const BRAND: BrandConfig = {
 
   hero: {
     chip: "Estimation personnalisée",
-    title: "Est-ce le bon moment pour vendre votre propriété à Sainte-Julie ?",
+    title: "Est-ce le bon moment pour vendre votre propriété sur la Rive-Sud ?",
     titleHighlight: "bon moment",
-    titleSoft: "Sainte-Julie",
+    titleSoft: "Rive-Sud",
     subtitle:
       "Répondez à une dizaine de questions et recevez une analyse honnête et confidentielle de votre timing, basée sur votre plus-value, votre équité et votre situation.",
     signature: "Boosté par l'IA",
